@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import Snackbar from '@mui/material/Snackbar';
 import { Button, FormControlLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, TextField } from '@mui/material';
-import { log } from 'console';
 
 interface InitialInput {
     fname: string;
@@ -59,11 +58,9 @@ export const UserForm = () => {
     const [open, setOpen] = useState<boolean>(false)
     const [errors, setErrors] = useState<InitialError>(initialError)
 
-    console.log(inputs);
-
     const validateInput = (name: any) => {
         const value = inputs[name as keyof InitialInput];
-        let newErrors = '';
+        let newErrors = ''
         const currentDate = new Date();
         switch (name) {
             case 'fname':
@@ -128,9 +125,7 @@ export const UserForm = () => {
 
     const changeHandler = (event: any) => {
         const { name, value } = event.target;
-        setInputs(prevInputs => ({ ...prevInputs, [name]: value }));
-        const error = validateInput(name);
-        setErrors((prevErrors) => ({ ...prevErrors, [name]: error }))
+        setInputs(prevInputs => ({ ...prevInputs, [name]: value }))
     };
 
     const handleClose = (reason: any) => {
@@ -142,18 +137,35 @@ export const UserForm = () => {
 
     const submitHandler = (event: any) => {
         event.preventDefault()
-        const newErrors: InitialError = initialError
+        const newErrors: InitialError = {...initialError}
         for (const key in inputs) {
-            console.log(key);
             const error = validateInput(key);
             if (error) newErrors[key as keyof InitialError] = error
         }
-        console.log(inputs);
-        console.log(newErrors);
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors)
+
+        function compareObjects(obj1: InitialError, obj2: InitialError): boolean {
+
+            const keys1 = Object.keys(obj1) as (keyof InitialError)[];
+            const keys2 = Object.keys(obj2) as (keyof InitialError)[];
+
+            if (!keys2.every(key => keys1.includes(key))) {
+                return false;
+            }
+
+            for (const key of keys1) {
+                if (obj1[key] !== obj2[key]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        console.log(compareObjects(initialError, newErrors))
+        if (compareObjects(initialError, newErrors)) {
+            setErrors(initialError)
+            setOpen(true)
         } else {
-            setOpen(true);
+            setErrors(newErrors)
         }
     }
 
